@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17324d"><title>カバネリ海門決戦 ポイントカウンター</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#172334;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+header{background:#17324d;color:white;padding:18px 15px}h1{font-size:21px;margin:0 0 4px}header p{font-size:13px;margin:0;color:#d8e6f5}
+main{max-width:700px;margin:auto;padding:13px}.panel{background:white;border:1px solid #dbe3ed;border-radius:14px;padding:14px;margin-bottom:13px}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:7px}select{width:100%;font-size:17px;padding:12px;border:1px solid #aab8ca;border-radius:10px;background:white}
+.current{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.counter{border:1px solid #dbe3ed;border-radius:11px;padding:11px;text-align:center}.counter.active{border:2px solid #2459a9;background:#edf4ff}.counter .name{font-size:13px;color:#526176}.counter .value{font-size:30px;font-weight:800;color:#2459a9}.secondary{margin-top:5px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#172334;font-size:13px}
+h2{font-size:17px;margin:0 0 10px}.quickgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quick{border:0;border-radius:12px;padding:17px 8px;color:white;font-size:24px;font-weight:850;min-height:76px;background:#2459a9}.quick small{display:block;font-size:12px;font-weight:500;margin-top:2px}.quick[data-pt="1"]{background:#526176}.quick[data-pt="15"]{background:#2459a9}.quick[data-pt="30"]{background:#18794e}.quick[data-pt="60"]{background:#8b3bb8}
+.hit{width:100%;padding:13px;background:#18794e;color:white;border:0;border-radius:10px;font-weight:800;font-size:16px;margin-top:10px}.small{font-size:12px;color:#637083;margin:6px 0 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{background:#f7f9fc;border-radius:10px;padding:11px}.stat strong{display:block;font-size:25px}.stat span{font-size:12px;color:#637083}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:9px 6px;text-align:left;border-bottom:1px solid #dbe3ed}th{background:#eef3f8}.tablewrap{overflow-x:auto}.delete{border:0;border-radius:7px;padding:6px;background:#fff0ef;color:#b42318}.empty{text-align:center;padding:15px;color:#637083;font-size:13px}
+@media(max-width:350px){main{padding:8px}.panel{padding:10px}.quick{font-size:21px}}
+</style></head>
+<body>
+<header><h1>カバネリ海門決戦｜ポイントカウンター</h1><p>＋1・＋15・＋30・＋60ptをワンタップで加算</p></header>
+<main>
+<section class="panel">
+<label for="who">ポイントを加算するキャラクター</label>
+<select id="who"><option value="mumei">無名</option><option value="ikoma">生駒</option></select>
+<div class="current">
+<div id="mumeiBox" class="counter active"><div class="name">無名の現在ポイント</div><div class="value" id="mumeiVal">0 pt</div><button class="secondary" type="button" data-select="mumei">無名を選ぶ</button></div>
+<div id="ikomaBox" class="counter"><div class="name">生駒の現在ポイント</div><div class="value" id="ikomaVal">0 pt</div><button class="secondary" type="button" data-select="ikoma">生駒を選ぶ</button></div>
+</div>
+</section>
+<section class="panel"><h2>ポイントをワンタップで加算</h2>
+<div class="quickgrid">
+<button class="quick" type="button" data-pt="1">＋1 pt<small>発光なし等</small></button>
+<button class="quick" type="button" data-pt="15">＋15 pt<small>発光あり・帯付き・通常複合</small></button>
+<button class="quick" type="button" data-pt="30">＋30 pt<small>高確複合・通常オールスター</small></button>
+<button class="quick" type="button" data-pt="60">＋60 pt<small>高確オールスター</small></button>
+</div>
+<p class="small">選択中のキャラクターに、押したポイントがそのまま加算されます。</p>
+<button class="hit" id="hit" type="button">無名のCZ当選として記録</button><p id="status" class="small" role="status" aria-live="polite" style="display:none;color:#18794e;font-weight:700"></p><p class="small">CZ当選時のポイントを記録し、選択中のキャラクターだけ0ptに戻します。</p>
+</section>
+<section class="panel"><h2>CZ当選ポイントの平均</h2><div class="stats"><div class="stat"><span>無名</span><strong id="mAvg">— pt</strong><span id="mN">0回</span></div><div class="stat"><span>生駒</span><strong id="iAvg">— pt</strong><span id="iN">0回</span></div></div></section>
+<section class="panel"><h2>CZ当選履歴</h2><div class="actions"><button class="secondary" id="undo" type="button">直前の当選を取り消す</button><button class="secondary" id="csv" type="button">CSV出力</button><button class="secondary" id="reset" type="button">全データをリセット</button></div><div class="tablewrap"><table><thead><tr><th>#</th><th>キャラ</th><th>当選pt</th><th>記録時刻</th><th></th></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty">CZ当選履歴はまだありません。</div></div></section>
+</main>
+<script>
+let s={mumei:0,ikoma:0,history:[]};
+try{const saved=JSON.parse(localStorage.getItem("kabaneriPointsV3"));if(saved&&typeof saved==="object")s={...s,...saved}}catch(e){}
+const who=document.getElementById("who");
+function save(){try{localStorage.setItem("kabaneriPointsV3",JSON.stringify(s))}catch(e){}}
+function render(){
+ const k=who.value;
+ document.getElementById("mumeiVal").textContent=s.mumei+" pt";document.getElementById("ikomaVal").textContent=s.ikoma+" pt";
+ document.getElementById("mumeiBox").classList.toggle("active",k==="mumei");document.getElementById("ikomaBox").classList.toggle("active",k==="ikoma");
+ document.getElementById("hit").textContent=(k==="mumei"?"無名":"生駒")+"のCZ当選として記録（"+s[k]+" pt）";
+ for(const key of ["mumei","ikoma"]){const list=s.history.filter(x=>x.player===key),avg=list.length?list.reduce((a,x)=>a+x.points,0)/list.length:null;document.getElementById(key==="mumei"?"mAvg":"iAvg").textContent=avg===null?"— pt":avg.toFixed(1)+" pt";document.getElementById(key==="mumei"?"mN":"iN").textContent=list.length+"回"}
+ document.getElementById("rows").innerHTML=s.history.slice().reverse().map((x,j)=>`<tr><td>${s.history.length-j}</td><td>${x.player==="mumei"?"無名":"生駒"}</td><td><b>${x.points} pt</b></td><td>${x.time}</td><td><button class="delete" type="button" data-del="${x.id}">削除</button></td></tr>`).join("");
+ document.getElementById("empty").style.display=s.history.length?"none":"block";
+}
+who.addEventListener("change",render);
+document.addEventListener("click",e=>{
+ const sel=e.target.closest("[data-select]");if(sel){who.value=sel.dataset.select;render();return}
+ const b=e.target.closest("[data-pt]");if(b){s[who.value]+=Number(b.dataset.pt);save();render();return}
+ const d=e.target.closest("[data-del]");if(d){s.history=s.history.filter(x=>x.id!==d.dataset.del);save();render()}
+});
+document.getElementById("hit").addEventListener("click",()=>{const k=who.value,points=s[k],name=k==="mumei"?"無名":"生駒";s.history.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),player:k,points,time:new Date().toLocaleString("ja-JP",{hour12:false})});s[k]=0;save();render();const msg=document.getElementById("status");msg.textContent=name+"のCZ当選を"+points+"ptで記録しました。";msg.style.display="block";});
+document.getElementById("undo").addEventListener("click",()=>{if(!s.history.length){alert("取り消す履歴がありません");return}const x=s.history.pop();s[x.player]+=x.points;save();render()});
+document.getElementById("reset").addEventListener("click",()=>{if(confirm("現在ptと履歴をすべて消去しますか？")){s={mumei:0,ikoma:0,history:[]};save();render()}});
+document.getElementById("csv").addEventListener("click",()=>{const data=[["番号","キャラ","当選ポイント","記録時刻"],...s.history.map((x,i)=>[i+1,x.player==="mumei"?"無名":"生駒",x.points,x.time])],csv="\ufeff"+data.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n"),u=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=u;a.download="カバネリCZ当選ポイント.csv";a.click();URL.revokeObjectURL(u)});
+render();
+</script></body></html>
